@@ -25,6 +25,12 @@ MODELS = {
     'pcl-v2': ['https://storage.googleapis.com/sfr-pcl-data-research/PCL_checkpoint/PCL_v2_epoch200.pth.tar', 'pth']
 }
 
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+        
+    def forward(self, x):
+        return x
 
 def convert_byol(tf_path, pth_path):
     byol = pickle.load(open(tf_path, 'rb'))
@@ -82,11 +88,11 @@ class LoadedResNet(nn.Module):
 
         if model_name == 'supervised':
             self.model = models.resnet50(pretrained=True)
-            del self.model.fc
+            self.model.fc = Identity()
         else:
             self.model = models.resnet50(pretrained=False)
-            del self.model.fc
-
+            self.model.fc = Identity()
+            
             path = os.path.join('models', f'{self.model_name}.pth')
             print(path)
             state_dict = torch.load(path, map_location=torch.device('cpu'))
